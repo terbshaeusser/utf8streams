@@ -1,7 +1,9 @@
 #include "utf8streams.hpp"
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <initializer_list>
+#include <string>
 #include <tuple>
 
 namespace utf8streams {
@@ -68,15 +70,15 @@ constexpr char UTF32BE_BOM[] = {'\x00', '\x00', '\xFE', '\xFF'};
 
 using EncodingInfo = std::tuple<Encoding, size_t, const void *>;
 
-constexpr EncodingInfo UTF8_INFO =
+static const EncodingInfo UTF8_INFO =
     EncodingInfo(Encoding::Utf8, sizeof(UTF8_BOM), UTF8_BOM);
-constexpr EncodingInfo UTF16LE_INFO =
+static const EncodingInfo UTF16LE_INFO =
     EncodingInfo(Encoding::Utf16LE, sizeof(UTF16LE_BOM), UTF16LE_BOM);
-constexpr EncodingInfo UTF16BE_INFO =
+static const EncodingInfo UTF16BE_INFO =
     EncodingInfo(Encoding::Utf16BE, sizeof(UTF16BE_BOM), UTF16BE_BOM);
-constexpr EncodingInfo UTF32LE_INFO =
+static const EncodingInfo UTF32LE_INFO =
     EncodingInfo(Encoding::Utf32LE, sizeof(UTF32LE_BOM), UTF32LE_BOM);
-constexpr EncodingInfo UTF32BE_INFO =
+static const EncodingInfo UTF32BE_INFO =
     EncodingInfo(Encoding::Utf32BE, sizeof(UTF32BE_BOM), UTF32BE_BOM);
 
 Encoding guessEncoding(std::istream &stream) {
@@ -101,7 +103,7 @@ Encoding guessEncoding(std::istream &stream) {
     }
   }
 
-  stream.seekg(-readBytes, std::ios::cur);
+  stream.seekg(-static_cast<std::streamoff>(readBytes), std::ios::cur);
   return Encoding::Unknown;
 }
 
@@ -416,7 +418,9 @@ int UTF8StreamBuf::sync() { return originalBuf->pubsync(); }
 
 std::streamsize UTF8StreamBuf::showmanyc() {
   auto available = originalBuf->in_avail();
-  return available > 0 ? std::max(1l, available / 4) : available;
+  return available > 0 ? std::max<std::streamsize>(
+                             1, static_cast<std::streamsize>(available) / 4)
+                       : available;
 }
 
 std::streamsize UTF8StreamBuf::xsgetn(char *buffer, std::streamsize n) {
