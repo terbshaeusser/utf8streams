@@ -147,13 +147,13 @@ void UTF8StreamBuf::putUnicode(uint32_t unicode) {
     byteBuff.put(static_cast<uint8_t>(0x80u | ((unicode >> 6u) & 0x3Fu)));
     byteBuff.put(static_cast<uint8_t>(0x80u | (unicode & 0x3Fu)));
   } else if (unicode < 0x10FFFF) {
-    byteBuff.put(static_cast<uint8_t>(0xE0u | (unicode >> 18u)));
+    byteBuff.put(static_cast<uint8_t>(0xF0u | (unicode >> 18u)));
     byteBuff.put(static_cast<uint8_t>(0x80u | ((unicode >> 12u) & 0x3Fu)));
     byteBuff.put(static_cast<uint8_t>(0x80u | ((unicode >> 6u) & 0x3Fu)));
     byteBuff.put(static_cast<uint8_t>(0x80u | (unicode & 0x3Fu)));
+  } else {
+    throw UnicodeError("Invalid Unicode sign " + std::to_string(unicode));
   }
-
-  throw UnicodeError("Invalid Unicode sign " + std::to_string(unicode));
 }
 
 std::streamsize UTF8StreamBuf::xsgetnUtf8(char *buffer, std::streamsize n) {
@@ -176,6 +176,7 @@ std::streamsize UTF8StreamBuf::xsgetnUtf16LE(char *buffer, std::streamsize n) {
 
     ++buffer;
     --n;
+    ++readBytes;
   }
 
   return readBytes;
@@ -251,6 +252,7 @@ std::streamsize UTF8StreamBuf::xsgetnUtf16BE(char *buffer, std::streamsize n) {
 
     ++buffer;
     --n;
+    ++readBytes;
   }
 
   return readBytes;
@@ -326,6 +328,7 @@ std::streamsize UTF8StreamBuf::xsgetnUtf32LE(char *buffer, std::streamsize n) {
 
     ++buffer;
     --n;
+    ++readBytes;
   }
 
   return readBytes;
@@ -373,6 +376,7 @@ std::streamsize UTF8StreamBuf::xsgetnUtf32BE(char *buffer, std::streamsize n) {
 
     ++buffer;
     --n;
+    ++readBytes;
   }
 
   return readBytes;
