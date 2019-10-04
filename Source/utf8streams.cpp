@@ -60,11 +60,11 @@ static bool isLowSurrogate(uint32_t codePoint) {
   throw std::runtime_error("Unreachable code reached");
 }
 
-constexpr char UTF8_BOM[] = "\xEF\xBB\xBF";
-constexpr char UTF16LE_BOM[] = "\xFF\xFE";
-constexpr char UTF16BE_BOM[] = "\xFE\xFF";
-constexpr char UTF32LE_BOM[] = "\xFF\xFE\x00\x00";
-constexpr char UTF32BE_BOM[] = "\x00\x00\xFE\xFF";
+constexpr char UTF8_BOM[] = {'\xEF', '\xBB', '\xBF'};
+constexpr char UTF16LE_BOM[] = {'\xFF', '\xFE'};
+constexpr char UTF16BE_BOM[] = {'\xFE', '\xFF'};
+constexpr char UTF32LE_BOM[] = {'\xFF', '\xFE', '\x00', '\x00'};
+constexpr char UTF32BE_BOM[] = {'\x00', '\x00', '\xFE', '\xFF'};
 
 using EncodingInfo = std::tuple<Encoding, size_t, const void *>;
 
