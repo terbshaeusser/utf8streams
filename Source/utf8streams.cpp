@@ -84,8 +84,11 @@ static const EncodingInfo UTF32BE_INFO =
 Encoding guessEncoding(std::istream &stream) {
   uint8_t bom[4];
 
+  auto startPos = stream.tellg();
   stream.read(reinterpret_cast<char *>(&bom[0]), sizeof(bom));
   auto readBytes = static_cast<size_t>(stream.gcount());
+
+  stream.clear();
 
   for (auto encodingInfo : std::initializer_list<EncodingInfo>{
            UTF32LE_INFO, UTF32BE_INFO, UTF16LE_INFO, UTF16BE_INFO, UTF8_INFO}) {
@@ -95,15 +98,15 @@ Encoding guessEncoding(std::istream &stream) {
 
     if (readBytes >= len && std::memcmp(bom, data, len) == 0) {
       if (len != readBytes) {
-        stream.seekg(-static_cast<std::streampos>(readBytes - len),
-                     std::ios::cur);
+        stream.seekg(startPos);
+        stream.seekg(len, std::ios::cur);
       }
 
       return encoding;
     }
   }
 
-  stream.seekg(-static_cast<std::streamoff>(readBytes), std::ios::cur);
+  stream.seekg(startPos);
   return Encoding::Unknown;
 }
 
