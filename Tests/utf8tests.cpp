@@ -84,8 +84,10 @@ TEST(Utf8, asciiGet) {
 
   for (auto c : content) {
     EXPECT_EQ(c, stream.get());
+    EXPECT_FALSE(stream.eof());
   }
   EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+  EXPECT_TRUE(stream.eof());
 }
 
 TEST(Utf8, multiByte) {
@@ -128,8 +130,10 @@ TEST(Utf8, multiByteGet) {
 
   for (auto c : content) {
     EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+    EXPECT_FALSE(stream.eof());
   }
   EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+  EXPECT_TRUE(stream.eof());
 }
 
 TEST(Utf16LE, simple) {
@@ -152,8 +156,10 @@ TEST(Utf16LE, get) {
 
   for (auto c : utf8Content) {
     EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+    EXPECT_FALSE(stream.eof());
   }
   EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+  EXPECT_TRUE(stream.eof());
 }
 
 TEST(Utf16LE, multiByte) {
@@ -199,8 +205,10 @@ TEST(Utf16LE, multiByteGet) {
 
   for (auto c : utf8Content) {
     EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+    EXPECT_FALSE(stream.eof());
   }
   EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+  EXPECT_TRUE(stream.eof());
 }
 
 TEST(Utf16BE, simple) {
@@ -223,8 +231,10 @@ TEST(Utf16LBE, get) {
 
   for (auto c : utf8Content) {
     EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+    EXPECT_FALSE(stream.eof());
   }
   EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+  EXPECT_TRUE(stream.eof());
 }
 
 TEST(Utf16BE, multiByte) {
@@ -270,8 +280,10 @@ TEST(Utf16BE, multiByteGet) {
 
   for (auto c : utf8Content) {
     EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+    EXPECT_FALSE(stream.eof());
   }
   EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+  EXPECT_TRUE(stream.eof());
 }
 
 TEST(Utf32LE, simple) {
@@ -298,8 +310,10 @@ TEST(Utf32LE, get) {
 
   for (auto c : utf8Content) {
     EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+    EXPECT_FALSE(stream.eof());
   }
   EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+  EXPECT_TRUE(stream.eof());
 }
 
 TEST(Utf32LE, multiByte) {
@@ -345,8 +359,10 @@ TEST(Utf32LE, multiByteGet) {
 
   for (auto c : utf8Content) {
     EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+    EXPECT_FALSE(stream.eof());
   }
   EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+  EXPECT_TRUE(stream.eof());
 }
 
 TEST(Utf32BE, simple) {
@@ -373,8 +389,10 @@ TEST(Utf32BE, get) {
 
   for (auto c : utf8Content) {
     EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+    EXPECT_FALSE(stream.eof());
   }
   EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+  EXPECT_TRUE(stream.eof());
 }
 
 TEST(Utf32BE, multiByte) {
@@ -420,6 +438,8 @@ TEST(Utf32BE, multiByteGet) {
 
   for (auto c : utf8Content) {
     EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+    EXPECT_FALSE(stream.eof());
   }
   EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+  EXPECT_TRUE(stream.eof());
 }
