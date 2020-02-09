@@ -61,6 +61,17 @@ TEST(Utf8, ascii) {
   EXPECT_EQ(0, std::memcmp("Hello World", buffer, 11));
 }
 
+TEST(Utf8, asciiGet) {
+  std::string content = "Hello World";
+  std::istringstream stream(content);
+  utf8streams::UTF8StreamBuf streamBuf(stream, utf8streams::Encoding::Utf8);
+
+  for (auto c : content) {
+    EXPECT_EQ(c, stream.get());
+  }
+  EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+}
+
 TEST(Utf8, multiByte) {
   std::istringstream stream("\xC3\xA4 \xE2\x82\xAC \xF0\x9D\x84\x9E");
   utf8streams::UTF8StreamBuf streamBuf(stream, utf8streams::Encoding::Utf8);
@@ -94,6 +105,17 @@ TEST(Utf8, multiByteParts) {
   EXPECT_EQ(0, std::memcmp("\x9D\x84\x9E", buffer, 3));
 }
 
+TEST(Utf8, multiByteGet) {
+  std::string content = "\xC3\xA4 \xE2\x82\xAC \xF0\x9D\x84\x9E";
+  std::istringstream stream(content);
+  utf8streams::UTF8StreamBuf streamBuf(stream, utf8streams::Encoding::Utf8);
+
+  for (auto c : content) {
+    EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+  }
+  EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+}
+
 TEST(Utf16LE, simple) {
   std::istringstream stream(
       std::string("H\0e\0l\0l\0o\0 \0W\0o\0r\0l\0d\0", 22));
@@ -104,6 +126,18 @@ TEST(Utf16LE, simple) {
 
   EXPECT_EQ(11, stream.gcount());
   EXPECT_EQ(0, std::memcmp("Hello World", buffer, 11));
+}
+
+TEST(Utf16LE, get) {
+  std::string utf8Content = "Hello World";
+  std::istringstream stream(
+      std::string("H\0e\0l\0l\0o\0 \0W\0o\0r\0l\0d\0", 22));
+  utf8streams::UTF8StreamBuf streamBuf(stream, utf8streams::Encoding::Utf16LE);
+
+  for (auto c : utf8Content) {
+    EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+  }
+  EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
 }
 
 TEST(Utf16LE, multiByte) {
@@ -141,6 +175,18 @@ TEST(Utf16LE, multiByteParts) {
   EXPECT_EQ(0, std::memcmp("\x9D\x84\x9E", buffer, 3));
 }
 
+TEST(Utf16LE, multiByteGet) {
+  std::string utf8Content = "\xC3\xA4 \xE2\x82\xAC \xF0\x9D\x84\x9E";
+  std::istringstream stream(
+      std::string("\xE4\0 \0\xAC\x20 \0\x34\xD8\x1E\xDD", 12));
+  utf8streams::UTF8StreamBuf streamBuf(stream, utf8streams::Encoding::Utf16LE);
+
+  for (auto c : utf8Content) {
+    EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+  }
+  EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+}
+
 TEST(Utf16BE, simple) {
   std::istringstream stream(
       std::string("\0H\0e\0l\0l\0o\0 \0W\0o\0r\0l\0d", 22));
@@ -151,6 +197,18 @@ TEST(Utf16BE, simple) {
 
   EXPECT_EQ(11, stream.gcount());
   EXPECT_EQ(0, std::memcmp("Hello World", buffer, 11));
+}
+
+TEST(Utf16LBE, get) {
+  std::string utf8Content = "Hello World";
+  std::istringstream stream(
+      std::string("\0H\0e\0l\0l\0o\0 \0W\0o\0r\0l\0d", 22));
+  utf8streams::UTF8StreamBuf streamBuf(stream, utf8streams::Encoding::Utf16BE);
+
+  for (auto c : utf8Content) {
+    EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+  }
+  EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
 }
 
 TEST(Utf16BE, multiByte) {
@@ -188,6 +246,18 @@ TEST(Utf16BE, multiByteParts) {
   EXPECT_EQ(0, std::memcmp("\x9D\x84\x9E", buffer, 3));
 }
 
+TEST(Utf16BE, multiByteGet) {
+  std::string utf8Content = "\xC3\xA4 \xE2\x82\xAC \xF0\x9D\x84\x9E";
+  std::istringstream stream(
+      std::string("\0\xE4\0 \x20\xAC\0 \xD8\x34\xDD\x1E", 12));
+  utf8streams::UTF8StreamBuf streamBuf(stream, utf8streams::Encoding::Utf16BE);
+
+  for (auto c : utf8Content) {
+    EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+  }
+  EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+}
+
 TEST(Utf32LE, simple) {
   std::istringstream stream(
       std::string("H\0\0\0e\0\0\0l\0\0\0l\0\0\0o\0\0\0 "
@@ -200,6 +270,20 @@ TEST(Utf32LE, simple) {
 
   EXPECT_EQ(11, stream.gcount());
   EXPECT_EQ(0, std::memcmp("Hello World", buffer, 11));
+}
+
+TEST(Utf32LE, get) {
+  std::string utf8Content = "Hello World";
+  std::istringstream stream(
+      std::string("H\0\0\0e\0\0\0l\0\0\0l\0\0\0o\0\0\0 "
+                  "\0\0\0W\0\0\0o\0\0\0r\0\0\0l\0\0\0d\0\0\0",
+                  44));
+  utf8streams::UTF8StreamBuf streamBuf(stream, utf8streams::Encoding::Utf32LE);
+
+  for (auto c : utf8Content) {
+    EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+  }
+  EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
 }
 
 TEST(Utf32LE, multiByte) {
@@ -237,6 +321,18 @@ TEST(Utf32LE, multiByteParts) {
   EXPECT_EQ(0, std::memcmp("\x9D\x84\x9E", buffer, 3));
 }
 
+TEST(Utf32LE, multiByteGet) {
+  std::string utf8Content = "\xC3\xA4 \xE2\x82\xAC \xF0\x9D\x84\x9E";
+  std::istringstream stream(
+      std::string("\xE4\0\0\0 \0\0\0\xAC\x20\0\0 \0\0\0\x1E\xD1\x01\0", 20));
+  utf8streams::UTF8StreamBuf streamBuf(stream, utf8streams::Encoding::Utf32LE);
+
+  for (auto c : utf8Content) {
+    EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+  }
+  EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
+}
+
 TEST(Utf32BE, simple) {
   std::istringstream stream(
       std::string("\0\0\0H\0\0\0e\0\0\0l\0\0\0l\0\0\0o\0\0\0 "
@@ -249,6 +345,20 @@ TEST(Utf32BE, simple) {
 
   EXPECT_EQ(11, stream.gcount());
   EXPECT_EQ(0, std::memcmp("Hello World", buffer, 11));
+}
+
+TEST(Utf32BE, get) {
+  std::string utf8Content = "Hello World";
+  std::istringstream stream(
+      std::string("\0\0\0H\0\0\0e\0\0\0l\0\0\0l\0\0\0o\0\0\0 "
+                  "\0\0\0W\0\0\0o\0\0\0r\0\0\0l\0\0\0d",
+                  44));
+  utf8streams::UTF8StreamBuf streamBuf(stream, utf8streams::Encoding::Utf32BE);
+
+  for (auto c : utf8Content) {
+    EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+  }
+  EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
 }
 
 TEST(Utf32BE, multiByte) {
@@ -284,4 +394,16 @@ TEST(Utf32BE, multiByteParts) {
 
   EXPECT_EQ(3, stream.gcount());
   EXPECT_EQ(0, std::memcmp("\x9D\x84\x9E", buffer, 3));
+}
+
+TEST(Utf32BE, multiByteGet) {
+  std::string utf8Content = "\xC3\xA4 \xE2\x82\xAC \xF0\x9D\x84\x9E";
+  std::istringstream stream(
+      std::string("\0\0\0\xE4\0\0\0 \0\0\x20\xAC\0\0\0 \0\x01\xD1\x1E", 20));
+  utf8streams::UTF8StreamBuf streamBuf(stream, utf8streams::Encoding::Utf32BE);
+
+  for (auto c : utf8Content) {
+    EXPECT_EQ(static_cast<uint8_t>(c), stream.get());
+  }
+  EXPECT_EQ(std::char_traits<char>::eof(), stream.get());
 }
