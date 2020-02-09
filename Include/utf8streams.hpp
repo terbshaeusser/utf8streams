@@ -37,10 +37,10 @@ private:
     bool hasData() const;
   };
 
-  typedef std::streamsize (*XsgetnCallback)(UTF8StreamBuf *self, char *buffer,
-                                            std::streamsize n);
-  typedef int (*UnderflowCallback)(UTF8StreamBuf *self);
-  typedef int (*UflowCallback)(UTF8StreamBuf *self);
+  typedef std::streamsize (UTF8StreamBuf::*XsgetnCallback)(char *buffer,
+                                                           std::streamsize n);
+  typedef int (UTF8StreamBuf::*UnderflowCallback)();
+  typedef int (UTF8StreamBuf::*UflowCallback)();
 
   std::streambuf *originalBuf;
   XsgetnCallback xsgetnCallback;

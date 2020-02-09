@@ -164,14 +164,14 @@ std::streamsize UTF8StreamBuf::xsgetnUtf8(char *buffer, std::streamsize n) {
 
 int UTF8StreamBuf::underflowUtf8() { return originalBuf->sgetc(); }
 
-int UTF8StreamBuf::uflowUtf8() { return originalBuf->snextc(); }
+int UTF8StreamBuf::uflowUtf8() { return originalBuf->sbumpc(); }
 
 std::streamsize UTF8StreamBuf::xsgetnUtf16LE(char *buffer, std::streamsize n) {
   auto readBytes = 0;
 
   while (n > 0) {
     auto c = uflowUtf16LE();
-    if (c == EOF) {
+    if (c == std::char_traits<char>::eof()) {
       break;
     }
     *buffer = static_cast<char>(c);
@@ -194,7 +194,7 @@ int UTF8StreamBuf::underflowUtf16LE() {
                                       sizeof(codePoint));
 
   if (readBytes == 0) {
-    return EOF;
+    return std::char_traits<char>::eof();
   }
   if (readBytes != sizeof(codePoint)) {
     throw UnicodeError("Incomplete code point found");
@@ -237,7 +237,7 @@ int UTF8StreamBuf::underflowUtf16LE() {
 int UTF8StreamBuf::uflowUtf16LE() {
   underflowUtf16LE();
   if (!byteBuff.hasData()) {
-    return EOF;
+    return std::char_traits<char>::eof();
   }
   return byteBuff.get();
 }
@@ -247,7 +247,7 @@ std::streamsize UTF8StreamBuf::xsgetnUtf16BE(char *buffer, std::streamsize n) {
 
   while (n > 0) {
     auto c = uflowUtf16BE();
-    if (c == EOF) {
+    if (c == std::char_traits<char>::eof()) {
       break;
     }
     *buffer = static_cast<char>(c);
@@ -270,7 +270,7 @@ int UTF8StreamBuf::underflowUtf16BE() {
                                       sizeof(codePoint));
 
   if (readBytes == 0) {
-    return EOF;
+    return std::char_traits<char>::eof();
   }
   if (readBytes != sizeof(codePoint)) {
     throw UnicodeError("Incomplete code point found");
@@ -313,7 +313,7 @@ int UTF8StreamBuf::underflowUtf16BE() {
 int UTF8StreamBuf::uflowUtf16BE() {
   underflowUtf16BE();
   if (!byteBuff.hasData()) {
-    return EOF;
+    return std::char_traits<char>::eof();
   }
   return byteBuff.get();
 }
@@ -323,7 +323,7 @@ std::streamsize UTF8StreamBuf::xsgetnUtf32LE(char *buffer, std::streamsize n) {
 
   while (n > 0) {
     auto c = uflowUtf32LE();
-    if (c == EOF) {
+    if (c == std::char_traits<char>::eof()) {
       break;
     }
     *buffer = static_cast<char>(c);
@@ -346,7 +346,7 @@ int UTF8StreamBuf::underflowUtf32LE() {
       originalBuf->sgetn(reinterpret_cast<char *>(&unicode), sizeof(unicode));
 
   if (readBytes == 0) {
-    return EOF;
+    return std::char_traits<char>::eof();
   }
   if (readBytes != sizeof(unicode)) {
     throw UnicodeError("Incomplete code point found");
@@ -361,7 +361,7 @@ int UTF8StreamBuf::underflowUtf32LE() {
 int UTF8StreamBuf::uflowUtf32LE() {
   underflowUtf32LE();
   if (!byteBuff.hasData()) {
-    return EOF;
+    return std::char_traits<char>::eof();
   }
   return byteBuff.get();
 }
@@ -371,7 +371,7 @@ std::streamsize UTF8StreamBuf::xsgetnUtf32BE(char *buffer, std::streamsize n) {
 
   while (n > 0) {
     auto c = uflowUtf32BE();
-    if (c == EOF) {
+    if (c == std::char_traits<char>::eof()) {
       break;
     }
     *buffer = static_cast<char>(c);
@@ -394,7 +394,7 @@ int UTF8StreamBuf::underflowUtf32BE() {
       originalBuf->sgetn(reinterpret_cast<char *>(&unicode), sizeof(unicode));
 
   if (readBytes == 0) {
-    return EOF;
+    return std::char_traits<char>::eof();
   }
   if (readBytes != sizeof(unicode)) {
     throw UnicodeError("Incomplete code point found");
@@ -409,7 +409,7 @@ int UTF8StreamBuf::underflowUtf32BE() {
 int UTF8StreamBuf::uflowUtf32BE() {
   underflowUtf32BE();
   if (!byteBuff.hasData()) {
-    return EOF;
+    return std::char_traits<char>::eof();
   }
   return byteBuff.get();
 }
@@ -424,12 +424,12 @@ std::streamsize UTF8StreamBuf::showmanyc() {
 }
 
 std::streamsize UTF8StreamBuf::xsgetn(char *buffer, std::streamsize n) {
-  return xsgetnCallback(this, buffer, n);
+  return (this->*xsgetnCallback)(buffer, n);
 }
 
-int UTF8StreamBuf::underflow() { return underflowCallback(this); }
+int UTF8StreamBuf::underflow() { return (this->*underflowCallback)(); }
 
-int UTF8StreamBuf::uflow() { return uflowCallback(this); }
+int UTF8StreamBuf::uflow() { return (this->*uflowCallback)(); }
 
 UTF8StreamBuf::UTF8StreamBuf(std::istream &stream, Encoding sourceEncoding)
     : originalBuf(stream.rdbuf()) {
@@ -443,48 +443,33 @@ UTF8StreamBuf::UTF8StreamBuf(std::istream &stream, Encoding sourceEncoding)
   case Encoding::Unknown:
     throw Error("Cannot create UTF8StreamBuf with unknown encoding");
   case Encoding::Utf8: {
-    auto f = &UTF8StreamBuf::xsgetnUtf8;
-    xsgetnCallback = *reinterpret_cast<XsgetnCallback *>(&f);
-    auto f2 = &UTF8StreamBuf::underflowUtf8;
-    underflowCallback = *reinterpret_cast<UnderflowCallback *>(&f2);
-    auto f3 = &UTF8StreamBuf::uflowUtf8;
-    uflowCallback = *reinterpret_cast<UflowCallback *>(&f3);
+    xsgetnCallback = &UTF8StreamBuf::xsgetnUtf8;
+    underflowCallback = &UTF8StreamBuf::underflowUtf8;
+    uflowCallback = &UTF8StreamBuf::uflowUtf8;
     break;
   }
   case Encoding::Utf16LE: {
-    auto f = &UTF8StreamBuf::xsgetnUtf16LE;
-    xsgetnCallback = *reinterpret_cast<XsgetnCallback *>(&f);
-    auto f2 = &UTF8StreamBuf::underflowUtf16LE;
-    underflowCallback = *reinterpret_cast<UnderflowCallback *>(&f2);
-    auto f3 = &UTF8StreamBuf::uflowUtf16LE;
-    uflowCallback = *reinterpret_cast<UflowCallback *>(&f3);
+    xsgetnCallback = &UTF8StreamBuf::xsgetnUtf16LE;
+    underflowCallback = &UTF8StreamBuf::underflowUtf16LE;
+    uflowCallback = &UTF8StreamBuf::uflowUtf16LE;
     break;
   }
   case Encoding::Utf16BE: {
-    auto f = &UTF8StreamBuf::xsgetnUtf16BE;
-    xsgetnCallback = *reinterpret_cast<XsgetnCallback *>(&f);
-    auto f2 = &UTF8StreamBuf::underflowUtf16BE;
-    underflowCallback = *reinterpret_cast<UnderflowCallback *>(&f2);
-    auto f3 = &UTF8StreamBuf::uflowUtf16BE;
-    uflowCallback = *reinterpret_cast<UflowCallback *>(&f3);
+    xsgetnCallback = &UTF8StreamBuf::xsgetnUtf16BE;
+    underflowCallback = &UTF8StreamBuf::underflowUtf16BE;
+    uflowCallback = &UTF8StreamBuf::uflowUtf16BE;
     break;
   }
   case Encoding::Utf32LE: {
-    auto f = &UTF8StreamBuf::xsgetnUtf32LE;
-    xsgetnCallback = *reinterpret_cast<XsgetnCallback *>(&f);
-    auto f2 = &UTF8StreamBuf::underflowUtf32LE;
-    underflowCallback = *reinterpret_cast<UnderflowCallback *>(&f2);
-    auto f3 = &UTF8StreamBuf::uflowUtf32LE;
-    uflowCallback = *reinterpret_cast<UflowCallback *>(&f3);
+    xsgetnCallback = &UTF8StreamBuf::xsgetnUtf32LE;
+    underflowCallback = &UTF8StreamBuf::underflowUtf32LE;
+    uflowCallback = &UTF8StreamBuf::uflowUtf32LE;
     break;
   }
   case Encoding::Utf32BE: {
-    auto f = &UTF8StreamBuf::xsgetnUtf32BE;
-    xsgetnCallback = *reinterpret_cast<XsgetnCallback *>(&f);
-    auto f2 = &UTF8StreamBuf::underflowUtf32BE;
-    underflowCallback = *reinterpret_cast<UnderflowCallback *>(&f2);
-    auto f3 = &UTF8StreamBuf::uflowUtf32BE;
-    uflowCallback = *reinterpret_cast<UflowCallback *>(&f3);
+    xsgetnCallback = &UTF8StreamBuf::xsgetnUtf32BE;
+    underflowCallback = &UTF8StreamBuf::underflowUtf32BE;
+    uflowCallback = &UTF8StreamBuf::uflowUtf32BE;
     break;
   }
   default:
