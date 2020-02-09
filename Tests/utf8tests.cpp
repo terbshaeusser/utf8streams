@@ -2,6 +2,14 @@
 #include <gtest/gtest.h>
 #include <utf8streams.hpp>
 
+TEST(guessEncoding, noBOMShort) {
+  std::istringstream stream("0");
+  auto encoding = utf8streams::guessEncoding(stream);
+
+  EXPECT_EQ(utf8streams::Encoding::Unknown, encoding);
+  EXPECT_EQ(0, stream.tellg());
+}
+
 TEST(guessEncoding, noBOM) {
   std::istringstream stream("Hello World");
   auto encoding = utf8streams::guessEncoding(stream);
@@ -20,6 +28,14 @@ TEST(guessEncoding, utf8BOM) {
 
 TEST(guessEncoding, utf16LEBOM) {
   std::istringstream stream("\xFF\xFEHello World");
+  auto encoding = utf8streams::guessEncoding(stream);
+
+  EXPECT_EQ(utf8streams::Encoding::Utf16LE, encoding);
+  EXPECT_EQ(2, stream.tellg());
+}
+
+TEST(guessEncoding, utf16LEBOMEmpty) {
+  std::istringstream stream("\xFF\xFE");
   auto encoding = utf8streams::guessEncoding(stream);
 
   EXPECT_EQ(utf8streams::Encoding::Utf16LE, encoding);
